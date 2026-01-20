@@ -3,7 +3,8 @@
 import { usePwaInstalled } from "./use-pwa-installed";
 import { usePlatform } from "./use-platform";
 import { getInstallInstructions } from "../constants/install-instructions";
-import type { InstallInstructions, DefaultInstallInstructionsConfig } from "../constants/install-instructions";
+import type { InstallInstructions } from "../core/types";
+import type { DefaultInstallInstructionsConfig } from "../constants/install-instructions";
 import type { ReactNode } from "react";
 
 export interface InstallPromptProps {

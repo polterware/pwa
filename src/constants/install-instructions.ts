@@ -75,6 +75,21 @@ const DEFAULT_INSTRUCTIONS: Required<DefaultInstallInstructionsConfig> = {
  * @param {DefaultInstallInstructionsConfig} config - Optional configuration to override default texts
  * @returns {InstallInstructions} The install instructions for the platform
  */
+function mergePlatformConfig<T extends Record<string, string>>(
+  defaultConfig: T,
+  userConfig?: Partial<T>
+): Required<T> {
+  if (!userConfig) return defaultConfig as Required<T>;
+  const result = { ...defaultConfig };
+  for (const key in userConfig) {
+    const value = userConfig[key];
+    if (value !== undefined) {
+      result[key] = value as T[Extract<keyof T, string>];
+    }
+  }
+  return result as Required<T>;
+}
+
 export function getInstallInstructions(
   platform: Platform,
   config: DefaultInstallInstructionsConfig = {}
@@ -85,10 +100,10 @@ export function getInstallInstructions(
     subtitleMacos: config.subtitleMacos ?? DEFAULT_INSTRUCTIONS.subtitleMacos,
     buttonText: config.buttonText ?? DEFAULT_INSTRUCTIONS.buttonText,
     gotItText: config.gotItText ?? DEFAULT_INSTRUCTIONS.gotItText,
-    ios: { ...DEFAULT_INSTRUCTIONS.ios, ...config.ios },
-    android: { ...DEFAULT_INSTRUCTIONS.android, ...config.android },
-    macos: { ...DEFAULT_INSTRUCTIONS.macos, ...config.macos },
-    desktop: { ...DEFAULT_INSTRUCTIONS.desktop, ...config.desktop },
+    ios: mergePlatformConfig(DEFAULT_INSTRUCTIONS.ios, config.ios),
+    android: mergePlatformConfig(DEFAULT_INSTRUCTIONS.android, config.android),
+    macos: mergePlatformConfig(DEFAULT_INSTRUCTIONS.macos, config.macos),
+    desktop: mergePlatformConfig(DEFAULT_INSTRUCTIONS.desktop, config.desktop),
   };
 
   switch (platform) {

@@ -356,7 +356,9 @@ export default function RootLayout({ children }) {
 
 ## License
 
-MIT
+MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+Copyright (c) 2024 Polterware
 
 ## Author
 
