@@ -11,6 +11,7 @@ A general-purpose PWA utilities package for detecting installation, platform det
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [CLI Usage](#cli-usage)
 - [Usage](#usage)
   - [Vanilla JavaScript / TypeScript](#vanilla-javascript--typescript)
   - [React](#react)
@@ -32,7 +33,8 @@ A general-purpose PWA utilities package for detecting installation, platform det
 - 📱 **Platform Detection**: Detect iOS, Android, macOS Safari, Desktop, and other platforms
 - 📋 **Install Instructions**: Get platform-specific install instructions
 - ⚙️ **Manifest Generator**: Generate Web App Manifest JSON
-- 🏷️ **Meta Tags Generator**: Generate HTML meta tags for PWA support
+- 🏷️ **Meta Tags Generator**: Generate structured meta tags objects (safe, no HTML injection)
+- 🛠️ **CLI Tool**: Manage PWA config with `npx @polterware/pwa init` and `update`
 - ⚛️ **React Hooks**: React hooks for easy integration
 - 🎨 **UI Agnostic**: No UI dependencies - use with any UI library
 - 📦 **TypeScript**: Full TypeScript support with type definitions
@@ -49,6 +51,71 @@ For React support, make sure you have React installed (peer dependency):
 ```bash
 npm install react react-dom
 ```
+
+## CLI Usage
+
+The easiest way to manage your PWA configuration is using the CLI tool.
+
+### Initialize Configuration
+
+Create a `pwa.config.json` file in your project root:
+
+```bash
+npx @polterware/pwa init
+```
+
+This creates a `pwa.config.json` file with a template:
+
+```json
+{
+  "name": "My App",
+  "shortName": "MyApp",
+  "description": "My awesome progressive web app",
+  "startUrl": "/",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "backgroundColor": "#ffffff",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "metaTags": {
+    "appleMobileWebAppCapable": true,
+    "appleMobileWebAppTitle": "My App"
+  }
+}
+```
+
+### Update Manifest
+
+After editing `pwa.config.json`, update your `manifest.json`:
+
+```bash
+npx @polterware/pwa update
+```
+
+The CLI will:
+- Read `pwa.config.json`
+- Find your existing `manifest.json` (in root, `public/`, or `app/` directories)
+- Update only app-specific fields (name, description, icons, theme colors, etc.)
+- **Preserve** all custom fields (shortcuts, share_target, categories, etc.)
+
+You can also specify a custom manifest path:
+
+```bash
+npx @polterware/pwa update --manifest-path custom/path/manifest.json
+```
+
+### Why Use the CLI?
+
+- ✅ **Safe**: Never overwrites custom manifest fields
+- ✅ **Simple**: One config file for all PWA settings
+- ✅ **Flexible**: Works with any framework
+- ✅ **CI/CD Ready**: Can be run in build scripts
 
 ## Quick Start
 
@@ -100,8 +167,7 @@ import {
   detectPlatform, 
   getInstallInstructions,
   generateManifest,
-  generateMetaTags,
-  metaTagsToHTML
+  getMetaTagsObject
 } from '@polterware/pwa';
 
 // Detect if PWA is installed
@@ -144,8 +210,8 @@ const manifest = generateManifest({
   ]
 });
 
-// Generate meta tags
-const metaTags = generateMetaTags({
+// Generate meta tags object (safe, no HTML injection)
+const metaTags = getMetaTagsObject({
   manifestPath: "/manifest.json",
   themeColor: "#7b2dff",
   appleMobileWebAppTitle: "My App",
@@ -157,9 +223,8 @@ const metaTags = generateMetaTags({
   ]
 });
 
-// Convert meta tags to HTML string
-const metaTagsHTML = metaTagsToHTML(metaTags);
-// Use in your HTML head section
+// Use programmatically - metaTags.links and metaTags.meta
+// Safe: No HTML string generation, avoids XSS risks
 ```
 
 ### React
@@ -340,39 +405,66 @@ const manifest = generateManifest({
 });
 ```
 
-#### `generateMetaTags(config?: MetaTagsConfig): MetaTag[]`
+#### `getMetaTagsObject(config?: MetaTagsConfig): MetaTagsObject`
 
-Generates HTML meta tags for PWA support.
+Generates a structured object representation of PWA meta tags. **This is safer than generating HTML strings** as it avoids XSS risks. Returns an object that can be used programmatically in any framework.
 
 **Parameters:**
 - `config` - Optional configuration for meta tags
 
-**Returns:** An array of meta tag objects.
+**Returns:** `MetaTagsObject` with `links` and `meta` arrays.
 
 **Example:**
 ```typescript
-const metaTags = generateMetaTags({
+import { getMetaTagsObject } from '@polterware/pwa';
+
+const metaTags = getMetaTagsObject({
   manifestPath: "/manifest.json",
   themeColor: "#7b2dff",
   appleMobileWebAppTitle: "My App"
 });
+
+// metaTags.links: Array of link tag objects
+// metaTags.meta: Array of meta tag objects
+// Use programmatically - no HTML injection risk
 ```
 
-#### `metaTagsToHTML(tags: MetaTag[]): string`
+#### `mergeManifest(existingManifest: object, newManifestConfig: object): object`
 
-Converts meta tag objects to HTML string.
+Merges a new manifest configuration into an existing manifest. Only updates app-specific fields (name, description, icons, theme colors, etc.), preserving all custom fields (shortcuts, share_target, categories, etc.).
 
 **Parameters:**
-- `tags` - Array of meta tag objects
+- `existingManifest` - The existing manifest JSON object
+- `newManifestConfig` - The new manifest configuration to merge
 
-**Returns:** HTML string with meta tags.
+**Returns:** Merged manifest object.
 
 **Example:**
 ```typescript
-const tags = generateMetaTags(/* ... */);
-const html = metaTagsToHTML(tags);
-// Use in your HTML head section
+import { mergeManifest, generateManifest } from '@polterware/pwa';
+
+const existing = {
+  name: "Old Name",
+  shortcuts: [{ name: "Custom Shortcut", url: "/shortcut" }],
+  categories: ["games"]
+};
+
+const updated = mergeManifest(existing, generateManifest({
+  name: "New Name",
+  short_name: "NewApp",
+  // ... other config
+}));
+
+// Result preserves shortcuts and categories while updating name
 ```
+
+#### `pwaConfigToManifestConfig(config: PWAConfig): ManifestConfig`
+
+Converts PWAConfig (from pwa.config.json) to ManifestConfig format.
+
+#### `pwaConfigToMetaTagsConfig(config: PWAConfig): MetaTagsConfig`
+
+Converts PWAConfig metaTags section to MetaTagsConfig format.
 
 ### React Hooks
 
@@ -515,9 +607,44 @@ interface UsePWAReturn {
   platform: Platform;
 }
 
-interface MetaTag {
-  tag: string;
-  attributes: Record<string, string>;
+interface MetaTagsObject {
+  links: Array<{
+    rel: string;
+    href: string;
+    sizes?: string;
+  }>;
+  meta: Array<{
+    name?: string;
+    property?: string;
+    content: string;
+  }>;
+}
+
+interface PWAConfig {
+  name: string;
+  shortName: string;
+  description: string;
+  startUrl: string;
+  display?: "standalone" | "fullscreen" | "minimal-ui" | "browser";
+  themeColor?: string;
+  backgroundColor?: string;
+  icons: Array<{
+    src: string;
+    sizes: string;
+    type: string;
+    purpose?: "any" | "maskable" | "any maskable";
+  }>;
+  metaTags?: {
+    manifestPath?: string;
+    themeColor?: string;
+    appleMobileWebAppCapable?: boolean;
+    appleMobileWebAppStatusBarStyle?: "default" | "black" | "black-translucent";
+    appleMobileWebAppTitle?: string;
+    appleTouchIcons?: Array<{
+      href: string;
+      sizes?: string;
+    }>;
+  };
 }
 ```
 
@@ -527,25 +654,25 @@ interface MetaTag {
 
 **app/layout.tsx:**
 ```typescript
-import { generateMetaTags, metaTagsToHTML } from '@polterware/pwa';
+import { getMetaTagsObject } from '@polterware/pwa';
+import type { Metadata } from 'next';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const metaTags = generateMetaTags({
-    manifestPath: "/manifest.json",
-    themeColor: "#7b2dff",
-    appleMobileWebAppTitle: "My App",
-    appleTouchIcons: [
-      { href: "/icons/apple-touch-icon.png" }
-    ]
-  });
+// Use getMetaTagsObject for safe, programmatic access to meta tags
+const metaTags = getMetaTagsObject({
+  manifestPath: "/manifest.json",
+  themeColor: "#7b2dff",
+  appleMobileWebAppTitle: "My App",
+  appleTouchIcons: [
+    { href: "/icons/apple-touch-icon.png" }
+  ]
+});
 
-  return (
-    <html>
-      <head dangerouslySetInnerHTML={{ __html: metaTagsToHTML(metaTags) }} />
-      <body>{children}</body>
-    </html>
-  );
-}
+// Convert to Next.js Metadata format (example)
+export const metadata: Metadata = {
+  manifest: metaTags.links.find(l => l.rel === 'manifest')?.href,
+  themeColor: metaTags.meta.find(m => m.name === 'theme-color')?.content,
+  // ... other metadata
+};
 ```
 
 **public/manifest.json:**

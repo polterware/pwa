@@ -21,4 +21,17 @@ export default defineConfig([
     outDir: "dist/react",
     external: ["react", "react-dom"],
   },
+  // CLI entry point
+  {
+    entry: ["src/cli/index.ts"],
+    format: ["cjs"],
+    dts: false,
+    splitting: false,
+    sourcemap: true,
+    outDir: "dist/cli",
+    banner: {
+      js: "#!/usr/bin/env node",
+    },
+    external: ["commander"],
+  },
 ]);
