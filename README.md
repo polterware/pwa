@@ -606,7 +606,7 @@ export function InstallButton() {
 
 MIT License - see the [LICENSE](LICENSE) file for details.
 
-Copyright (c) 2024 Polterware
+Copyright (c) 2026 Polterware
 
 ## Author
 
