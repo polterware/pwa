@@ -1,4 +1,5 @@
 import type { Platform, InstallInstructions } from "../core/types";
+import { LOCALES, type Locale } from "./locales";
 
 export interface DefaultInstallInstructionsConfig {
   title?: string;
@@ -34,6 +35,21 @@ export interface DefaultInstallInstructionsConfig {
   };
 }
 
+/**
+ * Configuration options for locale-based install instructions.
+ */
+export interface LocaleConfig {
+  /**
+   * The locale to use for built-in translations.
+   * Available: 'en', 'pt-BR', 'es'
+   */
+  locale: Locale;
+  /**
+   * Optional overrides to customize specific texts.
+   */
+  overrides?: DefaultInstallInstructionsConfig;
+}
+
 const DEFAULT_INSTRUCTIONS: Required<DefaultInstallInstructionsConfig> = {
   title: "Install App",
   subtitle: "Add to your home screen for quick access",
@@ -42,7 +58,8 @@ const DEFAULT_INSTRUCTIONS: Required<DefaultInstallInstructionsConfig> = {
   gotItText: "Got it!",
   ios: {
     step1Title: "Tap the Share icon",
-    step1Desc: "In Safari's bar, tap the share icon (square with arrow pointing up)",
+    step1Desc:
+      "In Safari's bar, tap the share icon (square with arrow pointing up)",
     step2Title: "Scroll down the menu",
     step2Desc: "In the sheet that opens, drag down to see more options",
     step3Title: "Tap 'Add to Home Screen'",
@@ -70,14 +87,14 @@ const DEFAULT_INSTRUCTIONS: Required<DefaultInstallInstructionsConfig> = {
 
 /**
  * Gets install instructions for a specific platform.
- * 
+ *
  * @param {Platform} platform - The platform to get instructions for
  * @param {DefaultInstallInstructionsConfig} config - Optional configuration to override default texts
  * @returns {InstallInstructions} The install instructions for the platform
  */
 function mergePlatformConfig<T extends Record<string, string>>(
   defaultConfig: T,
-  userConfig?: Partial<T>
+  userConfig?: Partial<T>,
 ): Required<T> {
   if (!userConfig) return defaultConfig as Required<T>;
   const result = { ...defaultConfig };
@@ -92,18 +109,32 @@ function mergePlatformConfig<T extends Record<string, string>>(
 
 export function getInstallInstructions(
   platform: Platform,
-  config: DefaultInstallInstructionsConfig = {}
+  config: DefaultInstallInstructionsConfig | LocaleConfig = {},
 ): InstallInstructions {
+  // Determine which config type was provided
+  let baseConfig: Required<DefaultInstallInstructionsConfig>;
+  let userOverrides: DefaultInstallInstructionsConfig;
+
+  if ("locale" in config && config.locale) {
+    // Locale-based config: use locale preset as base, apply overrides
+    baseConfig = LOCALES[config.locale] ?? LOCALES.en;
+    userOverrides = config.overrides ?? {};
+  } else {
+    // Legacy config: use default English as base, apply config as overrides
+    baseConfig = DEFAULT_INSTRUCTIONS;
+    userOverrides = config as DefaultInstallInstructionsConfig;
+  }
+
   const mergedConfig = {
-    title: config.title ?? DEFAULT_INSTRUCTIONS.title,
-    subtitle: config.subtitle ?? DEFAULT_INSTRUCTIONS.subtitle,
-    subtitleMacos: config.subtitleMacos ?? DEFAULT_INSTRUCTIONS.subtitleMacos,
-    buttonText: config.buttonText ?? DEFAULT_INSTRUCTIONS.buttonText,
-    gotItText: config.gotItText ?? DEFAULT_INSTRUCTIONS.gotItText,
-    ios: mergePlatformConfig(DEFAULT_INSTRUCTIONS.ios, config.ios),
-    android: mergePlatformConfig(DEFAULT_INSTRUCTIONS.android, config.android),
-    macos: mergePlatformConfig(DEFAULT_INSTRUCTIONS.macos, config.macos),
-    desktop: mergePlatformConfig(DEFAULT_INSTRUCTIONS.desktop, config.desktop),
+    title: userOverrides.title ?? baseConfig.title,
+    subtitle: userOverrides.subtitle ?? baseConfig.subtitle,
+    subtitleMacos: userOverrides.subtitleMacos ?? baseConfig.subtitleMacos,
+    buttonText: userOverrides.buttonText ?? baseConfig.buttonText,
+    gotItText: userOverrides.gotItText ?? baseConfig.gotItText,
+    ios: mergePlatformConfig(baseConfig.ios, userOverrides.ios),
+    android: mergePlatformConfig(baseConfig.android, userOverrides.android),
+    macos: mergePlatformConfig(baseConfig.macos, userOverrides.macos),
+    desktop: mergePlatformConfig(baseConfig.desktop, userOverrides.desktop),
   };
 
   switch (platform) {

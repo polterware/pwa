@@ -72,4 +72,55 @@ describe("getInstallInstructions", () => {
     expect(instructions.buttonText).toBeDefined();
     expect(instructions.steps[0].title).toBeDefined();
   });
+
+  // Locale-based tests
+  describe("locale support", () => {
+    it("should return Portuguese (Brazil) instructions when locale is pt-BR", () => {
+      const instructions = getInstallInstructions("ios", { locale: "pt-BR" });
+
+      expect(instructions.title).toBe("Instalar App");
+      expect(instructions.buttonText).toBe("Instalar App");
+      expect(instructions.gotItText).toBe("Entendi!");
+      expect(instructions.steps[0].title).toBe("Toque no ícone Compartilhar");
+    });
+
+    it("should return Spanish instructions when locale is es", () => {
+      const instructions = getInstallInstructions("android", { locale: "es" });
+
+      expect(instructions.title).toBe("Instalar App");
+      expect(instructions.buttonText).toBe("Instalar App");
+      expect(instructions.gotItText).toBe("¡Entendido!");
+      expect(instructions.steps[0].title).toBe("Abre el menú del navegador");
+    });
+
+    it("should allow overrides with locale", () => {
+      const instructions = getInstallInstructions("ios", {
+        locale: "pt-BR",
+        overrides: {
+          title: "Meu App Customizado",
+        },
+      });
+
+      expect(instructions.title).toBe("Meu App Customizado");
+      expect(instructions.buttonText).toBe("Instalar App"); // From pt-BR preset
+      expect(instructions.steps[0].title).toBe("Toque no ícone Compartilhar"); // From pt-BR preset
+    });
+
+    it("should use English as fallback for invalid locale", () => {
+      // @ts-expect-error Testing invalid locale
+      const instructions = getInstallInstructions("ios", { locale: "invalid" });
+
+      expect(instructions.title).toBe("Install App");
+      expect(instructions.buttonText).toBe("Install App");
+    });
+
+    it("should work with macos_safari platform and locale", () => {
+      const instructions = getInstallInstructions("macos_safari", {
+        locale: "pt-BR",
+      });
+
+      expect(instructions.subtitle).toBe("Adicione ao Dock para acesso rápido");
+      expect(instructions.steps[0].title).toBe("Clique no menu Arquivo");
+    });
+  });
 });

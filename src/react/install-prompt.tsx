@@ -4,7 +4,8 @@ import { useIsInstalled } from "./use-is-installed";
 import { usePlatform } from "./use-platform";
 import { getInstallInstructions } from "../constants/install-instructions";
 import type { InstallInstructions } from "../core/types";
-import type { DefaultInstallInstructionsConfig } from "../constants/install-instructions";
+import type { DefaultInstallInstructionsConfig, LocaleConfig } from "../constants/install-instructions";
+import type { Locale } from "../constants/locales";
 import type { ReactNode } from "react";
 
 export interface InstallPromptProps {
@@ -27,8 +28,16 @@ export interface InstallPromptProps {
 
   /**
    * Configuration to override default instruction texts.
+   * When using the locale prop, this acts as overrides for the locale preset.
    */
   instructionsConfig?: DefaultInstallInstructionsConfig;
+
+  /**
+   * Shorthand for locale-based instructions.
+   * When provided, uses built-in translations for the specified locale.
+   * Available: 'en', 'pt-BR', 'es'
+   */
+  locale?: Locale;
 
   /**
    * If true, the component will not render if PWA is already installed.
@@ -68,11 +77,15 @@ export function InstallPrompt({
   renderTrigger,
   children,
   instructionsConfig,
+  locale,
   hideIfInstalled = true,
 }: InstallPromptProps) {
   const isInstalled = useIsInstalled();
   const platform = usePlatform();
-  const instructions = getInstallInstructions(platform, instructionsConfig);
+
+  // Determine the config to use: locale shorthand takes precedence
+  const config = locale ? { locale, overrides: instructionsConfig } : instructionsConfig;
+  const instructions = getInstallInstructions(platform, config);
 
   if (hideIfInstalled && isInstalled) {
     return null;

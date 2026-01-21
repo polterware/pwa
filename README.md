@@ -40,7 +40,6 @@ import {
   detectInstalled, // Check if PWA is installed
   detectPlatform, // Get current platform
   getInstallInstructions, // Get platform-specific instructions
-  mergeManifest, // Merge manifest configurations
 } from "@polterware/pwa";
 
 // React hooks & components
@@ -54,6 +53,7 @@ import {
 // Types
 import type {
   Platform, // 'ios' | 'android' | 'macos_safari' | 'desktop' | 'other'
+  Locale, // 'en' | 'pt-BR' | 'es'
   InstallInstructions, // Install instructions object
   InstallInstruction, // Single instruction step
 } from "@polterware/pwa";
@@ -169,28 +169,34 @@ const platform = detectPlatform();
 
 #### `getInstallInstructions(platform, config?): InstallInstructions`
 
-Returns platform-specific install instructions. Customize texts via config.
+Returns platform-specific install instructions. Supports built-in locales or custom config.
 
 ```typescript
+// Using built-in locale (en, pt-BR, es)
+const instructions = getInstallInstructions("ios", { locale: "pt-BR" });
+
+// Using custom config
 const instructions = getInstallInstructions("ios", {
   title: "Install My App",
   subtitle: "Add to your home screen",
   buttonText: "Install",
   gotItText: "Got it!",
 });
-```
 
-#### `mergeManifest(existing, newConfig): object`
-
-Merges a new manifest configuration into an existing manifest, preserving custom fields.
-
-```typescript
-const updated = mergeManifest(existingManifest, {
-  name: "New Name",
-  theme_color: "#7b2dff",
+// Using locale with overrides
+const instructions = getInstallInstructions("ios", {
+  locale: "pt-BR",
+  overrides: { title: "Meu App" },
 });
-// Preserves: shortcuts, categories, share_target, etc.
 ```
+
+**Available Locales:**
+
+| Locale  | Language            |
+| ------- | ------------------- |
+| `en`    | English (default)   |
+| `pt-BR` | Portuguese (Brazil) |
+| `es`    | Spanish             |
 
 ### React Hooks
 
