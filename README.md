@@ -102,6 +102,7 @@ function MyApp() {
 
   return (
     <InstallPrompt
+      locale="pt-BR"
       renderTrigger={(instructions) => (
         <button>{instructions.buttonText}</button>
       )}
@@ -236,6 +237,7 @@ UI-agnostic component with render props for complete customization.
 | `renderInstructions` | `(instructions) => ReactNode` | -       | Render function for instructions         |
 | `children`           | `ReactNode`                   | -       | Fallback if `renderTrigger` not provided |
 | `instructionsConfig` | `object`                      | -       | Override default instruction texts       |
+| `locale`             | `'en' \| 'pt-BR' \| 'es'`     | -       | Use built-in translations for locale     |
 | `hideIfInstalled`    | `boolean`                     | `true`  | Hide component if PWA is installed       |
 
 ---

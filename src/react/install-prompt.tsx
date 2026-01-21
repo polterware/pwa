@@ -84,7 +84,11 @@ export function InstallPrompt({
   const platform = usePlatform();
 
   // Determine the config to use: locale shorthand takes precedence
-  const config = locale ? { locale, overrides: instructionsConfig } : instructionsConfig;
+  // If neither locale nor instructionsConfig is provided, use empty object to get default English
+  const config: DefaultInstallInstructionsConfig | LocaleConfig = 
+    locale 
+      ? { locale, overrides: instructionsConfig } 
+      : instructionsConfig ?? {};
   const instructions = getInstallInstructions(platform, config);
 
   if (hideIfInstalled && isInstalled) {
