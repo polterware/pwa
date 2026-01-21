@@ -1,3 +1,5 @@
+![Header](https://odtcysoyznttkcpvbyju.supabase.co/storage/v1/object/public/polterware-bucket/pwa.png)
+
 # @polterware/pwa
 
 [![npm version](https://img.shields.io/npm/v/@polterware/pwa.svg)](https://www.npmjs.com/package/@polterware/pwa)
