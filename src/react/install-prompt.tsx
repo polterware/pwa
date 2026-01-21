@@ -1,6 +1,6 @@
 "use client";
 
-import { usePwaInstalled } from "./use-pwa-installed";
+import { usePwaInstalled } from "./use-is-pwa";
 import { usePlatform } from "./use-platform";
 import { getInstallInstructions } from "../constants/install-instructions";
 import type { InstallInstructions } from "../core/types";
@@ -40,7 +40,7 @@ export interface InstallPromptProps {
 /**
  * InstallPrompt component that provides install instructions based on the detected platform.
  * This component is UI-agnostic and uses render props for complete customization.
- * 
+ *
  * @example
  * ```tsx
  * <InstallPrompt

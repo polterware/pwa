@@ -15,6 +15,7 @@ export interface InstallInstructions {
   gotItText: string;
 }
 
+// ManifestConfig is only used internally by the CLI
 export interface ManifestConfig {
   name: string;
   short_name: string;
@@ -33,16 +34,4 @@ export interface ManifestConfig {
   categories?: string[];
   lang?: string;
   dir?: "ltr" | "rtl";
-}
-
-export interface MetaTagsConfig {
-  manifestPath?: string;
-  themeColor?: string;
-  appleMobileWebAppCapable?: boolean;
-  appleMobileWebAppStatusBarStyle?: "default" | "black" | "black-translucent";
-  appleMobileWebAppTitle?: string;
-  appleTouchIcons?: Array<{
-    href: string;
-    sizes?: string;
-  }>;
 }

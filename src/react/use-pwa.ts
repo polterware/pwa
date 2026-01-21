@@ -1,6 +1,6 @@
 "use client";
 
-import { usePwaInstalled } from "./use-pwa-installed";
+import { usePwaInstalled } from "./use-is-pwa";
 import { usePlatform } from "./use-platform";
 import type { Platform } from "../core/types";
 
@@ -22,18 +22,18 @@ export interface UsePWAReturn {
 /**
  * React hook that combines PWA detection and platform detection.
  * Returns an object with both isPWA/isInstalled and platform information.
- * 
+ *
  * @returns {UsePWAReturn} Object containing isPWA, isInstalled, and platform
- * 
+ *
  * @example
  * ```tsx
  * function MyComponent() {
  *   const { isPWA, platform } = usePWA();
- *   
+ *
  *   if (isPWA) {
  *     return <div>Running as PWA on {platform}</div>;
  *   }
- *   
+ *
  *   return <div>Running in browser on {platform}</div>;
  * }
  * ```

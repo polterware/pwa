@@ -1,4 +1,4 @@
-export { usePwaInstalled } from "./use-pwa-installed";
+export { usePwaInstalled } from "./use-is-pwa";
 export { usePlatform } from "./use-platform";
 export { useIsPWA } from "./use-is-pwa";
 export { usePWA } from "./use-pwa";

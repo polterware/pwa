@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-A general-purpose PWA utilities package for detecting installation, platform detection, and generating PWA configurations. Works with any framework or vanilla JavaScript.
+A general-purpose PWA utilities package for detecting installation, platform detection, and PWA install instructions. Works with any framework or vanilla JavaScript.
 
 ## Table of Contents
 
@@ -32,9 +32,7 @@ A general-purpose PWA utilities package for detecting installation, platform det
 - 🔍 **Installation Detection**: Detect if your PWA is already installed
 - 📱 **Platform Detection**: Detect iOS, Android, macOS Safari, Desktop, and other platforms
 - 📋 **Install Instructions**: Get platform-specific install instructions
-- ⚙️ **Manifest Generator**: Generate Web App Manifest JSON
-- 🏷️ **Meta Tags Generator**: Generate structured meta tags objects (safe, no HTML injection)
-- 🛠️ **CLI Tool**: Manage PWA config with `npx @polterware/pwa init` and `update`
+- 🛠️ **Interactive CLI**: Interactive setup tool to create or update PWA manifest with guided questions
 - ⚛️ **React Hooks**: React hooks for easy integration
 - 🎨 **UI Agnostic**: No UI dependencies - use with any UI library
 - 📦 **TypeScript**: Full TypeScript support with type definitions
@@ -54,68 +52,96 @@ npm install react react-dom
 
 ## CLI Usage
 
-The easiest way to manage your PWA configuration is using the CLI tool.
+The easiest way to set up your PWA manifest is using the interactive CLI tool.
 
-### Initialize Configuration
+### Initialize Manifest
 
-Create a `pwa.config.json` file in your project root:
+Run the interactive setup to create or update your `manifest.json`:
 
 ```bash
 npx @polterware/pwa init
 ```
 
-This creates a `pwa.config.json` file with a template:
+The CLI will:
+1. **Look for existing manifest** - If a `manifest.json` already exists, it will read it and use existing values as placeholders
+2. **Ask interactive questions** - Fill in all required fields through a friendly questionnaire
+3. **Create manifest** - Create or update the `manifest.json` file with your answers
+
+**Example interactive session:**
+
+```
+📖 Found existing manifest at: public/manifest.json
+
+📝 Let's set up your PWA manifest!
+
+? App name (full name): My Awesome App
+? App short name (max 12 characters recommended): MyApp
+? App description: An amazing progressive web app
+? Start URL (usually '/' for root): /
+? Theme color (hex, e.g., #000000): #7b2dff
+? Background color (hex, e.g., #ffffff): #0f0f0f
+? Icon folder path (e.g., /icons): /icons
+? Icon sizes (select all that apply): 192x192, 512x512
+
+✅ Manifest created successfully!
+📝 Location: public/manifest.json
+```
+
+**Example created manifest.json:**
 
 ```json
 {
-  "name": "My App",
-  "shortName": "MyApp",
-  "description": "My awesome progressive web app",
-  "startUrl": "/",
+  "name": "My Awesome App",
+  "short_name": "MyApp",
+  "description": "An amazing progressive web app",
+  "start_url": "/",
   "display": "standalone",
-  "themeColor": "#000000",
-  "backgroundColor": "#ffffff",
+  "background_color": "#0f0f0f",
+  "theme_color": "#7b2dff",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "metaTags": {
-    "appleMobileWebAppCapable": true,
-    "appleMobileWebAppTitle": "My App"
-  }
+  ]
 }
 ```
-
-### Update Manifest
-
-After editing `pwa.config.json`, update your `manifest.json`:
-
-```bash
-npx @polterware/pwa update
-```
-
-The CLI will:
-- Read `pwa.config.json`
-- Find your existing `manifest.json` (in root, `public/`, or `app/` directories)
-- Update only app-specific fields (name, description, icons, theme colors, etc.)
-- **Preserve** all custom fields (shortcuts, share_target, categories, etc.)
 
 You can also specify a custom manifest path:
 
 ```bash
-npx @polterware/pwa update --manifest-path custom/path/manifest.json
+npx @polterware/pwa init --manifest-path custom/path/manifest.json
 ```
 
-### Why Use the CLI?
+### Icon Configuration
 
-- ✅ **Safe**: Never overwrites custom manifest fields
-- ✅ **Simple**: One config file for all PWA settings
-- ✅ **Flexible**: Works with any framework
-- ✅ **CI/CD Ready**: Can be run in build scripts
+The CLI will ask for:
+1. **Icon folder path** - The folder where your icons are stored (e.g., `/icons`)
+2. **Icon sizes** - Select which icon sizes you want to include (192x192 and 512x512 are recommended and selected by default)
+
+The CLI automatically creates icon entries in the format: `{folder}/icon-{size}.png`
+- Example: If folder is `/icons` and you select `192x192` and `512x512`, it will create:
+  - `/icons/icon-192x192.png`
+  - `/icons/icon-512x512.png`
+
+### Features
+
+- ✅ **Interactive Setup**: Guided questions make configuration easy and foolproof
+- ✅ **Smart Defaults**: Existing manifest values are automatically used as placeholders
+- ✅ **Update Existing**: Easily update an existing manifest by running the command again
+- ✅ **Auto-Detection**: Automatically finds manifest.json in common locations (root, public/, app/)
+- ✅ **Icon Size Selection**: Choose which icon sizes to include from a list
+- ✅ **Validation**: Validates inputs (hex colors, required fields, etc.)
+- ✅ **Framework Agnostic**: Works with any framework or vanilla JavaScript project
+- ✅ **Standalone Default**: Display mode is always set to "standalone" (standard for PWAs)
 
 ## Quick Start
 
@@ -162,13 +188,7 @@ function MyApp() {
 ### Vanilla JavaScript / TypeScript
 
 ```typescript
-import { 
-  detectInstalled, 
-  detectPlatform, 
-  getInstallInstructions,
-  generateManifest,
-  getMetaTagsObject
-} from '@polterware/pwa';
+import { detectInstalled, detectPlatform, getInstallInstructions } from '@polterware/pwa';
 
 // Detect if PWA is installed
 const isInstalled = detectInstalled();
@@ -184,64 +204,18 @@ const instructions = getInstallInstructions(platform, {
   gotItText: "Got it!",
   // ... customize instruction texts
 });
-
-// Generate manifest.json
-const manifest = generateManifest({
-  name: "My App",
-  short_name: "MyApp",
-  description: "My awesome app",
-  start_url: "/",
-  display: "standalone",
-  theme_color: "#7b2dff",
-  background_color: "#0f0f0f",
-  icons: [
-    {
-      src: "/icons/icon-192x192.png",
-      sizes: "192x192",
-      type: "image/png",
-      purpose: "any maskable"
-    },
-    {
-      src: "/icons/icon-512x512.png",
-      sizes: "512x512",
-      type: "image/png",
-      purpose: "any maskable"
-    }
-  ]
-});
-
-// Generate meta tags object (safe, no HTML injection)
-const metaTags = getMetaTagsObject({
-  manifestPath: "/manifest.json",
-  themeColor: "#7b2dff",
-  appleMobileWebAppTitle: "My App",
-  appleMobileWebAppCapable: true,
-  appleMobileWebAppStatusBarStyle: "black-translucent",
-  appleTouchIcons: [
-    { href: "/icons/apple-touch-icon.png" },
-    { href: "/icons/apple-touch-icon-180x180.png", sizes: "180x180" }
-  ]
-});
-
-// Use programmatically - metaTags.links and metaTags.meta
-// Safe: No HTML string generation, avoids XSS risks
 ```
 
 ### React
 
+**Option 1: Simple check**
 ```typescript
-import { useIsPWA, usePWA, usePlatform, InstallPrompt } from '@polterware/pwa/react';
+import { useIsPWA, InstallPrompt } from '@polterware/pwa/react';
+import { useState } from 'react';
 
 function MyApp() {
-  // Option 1: Simple check
   const isPWA = useIsPWA();
-  
-  // Option 2: Combined hook (recommended)
-  const { isPWA: isInstalled, platform } = usePWA();
-  
-  // Option 3: Separate hooks
-  const isInstalled = usePwaInstalled();
-  const platform = usePlatform();
+  const [open, setOpen] = useState(false);
 
   if (isPWA) {
     return <div>App is installed!</div>;
@@ -250,7 +224,7 @@ function MyApp() {
   return (
     <InstallPrompt
       renderTrigger={(instructions) => (
-        <button onClick={handleOpen}>
+        <button onClick={() => setOpen(true)}>
           {instructions.buttonText}
         </button>
       )}
@@ -264,6 +238,90 @@ function MyApp() {
               <p>{step.description}</p>
             </div>
           ))}
+          <button onClick={() => setOpen(false)}>
+            {instructions.gotItText}
+          </button>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+**Option 2: Combined hook (recommended)**
+```typescript
+import { usePWA, InstallPrompt } from '@polterware/pwa/react';
+import { useState } from 'react';
+
+function MyApp() {
+  const { isPWA, platform } = usePWA();
+  const [open, setOpen] = useState(false);
+
+  if (isPWA) {
+    return <div>App is installed on {platform}!</div>;
+  }
+
+  return (
+    <InstallPrompt
+      renderTrigger={(instructions) => (
+        <button onClick={() => setOpen(true)}>
+          {instructions.buttonText}
+        </button>
+      )}
+      renderInstructions={(instructions) => (
+        <div>
+          <h2>{instructions.title}</h2>
+          <p>{instructions.subtitle}</p>
+          {instructions.steps.map(step => (
+            <div key={step.number}>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          ))}
+          <button onClick={() => setOpen(false)}>
+            {instructions.gotItText}
+          </button>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+**Option 3: Separate hooks**
+```typescript
+import { usePwaInstalled, usePlatform, InstallPrompt } from '@polterware/pwa/react';
+import { useState } from 'react';
+
+function MyApp() {
+  const isInstalled = usePwaInstalled();
+  const platform = usePlatform();
+  const [open, setOpen] = useState(false);
+
+  if (isInstalled) {
+    return <div>App is installed on {platform}!</div>;
+  }
+
+  return (
+    <InstallPrompt
+      renderTrigger={(instructions) => (
+        <button onClick={() => setOpen(true)}>
+          {instructions.buttonText}
+        </button>
+      )}
+      renderInstructions={(instructions) => (
+        <div>
+          <h2>{instructions.title}</h2>
+          <p>{instructions.subtitle}</p>
+          {instructions.steps.map(step => (
+            <div key={step.number}>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          ))}
+          <button onClick={() => setOpen(false)}>
+            {instructions.gotItText}
+          </button>
         </div>
       )}
     />
@@ -382,53 +440,6 @@ const instructions = getInstallInstructions('ios', {
 });
 ```
 
-#### `generateManifest(config: ManifestConfig): object`
-
-Generates a Web App Manifest JSON object based on the provided configuration.
-
-**Parameters:**
-- `config` - Manifest configuration object
-
-**Returns:** A Web App Manifest JSON object.
-
-**Example:**
-```typescript
-const manifest = generateManifest({
-  name: "My App",
-  short_name: "MyApp",
-  description: "My awesome app",
-  start_url: "/",
-  display: "standalone",
-  theme_color: "#7b2dff",
-  background_color: "#0f0f0f",
-  icons: [/* ... */]
-});
-```
-
-#### `getMetaTagsObject(config?: MetaTagsConfig): MetaTagsObject`
-
-Generates a structured object representation of PWA meta tags. **This is safer than generating HTML strings** as it avoids XSS risks. Returns an object that can be used programmatically in any framework.
-
-**Parameters:**
-- `config` - Optional configuration for meta tags
-
-**Returns:** `MetaTagsObject` with `links` and `meta` arrays.
-
-**Example:**
-```typescript
-import { getMetaTagsObject } from '@polterware/pwa';
-
-const metaTags = getMetaTagsObject({
-  manifestPath: "/manifest.json",
-  themeColor: "#7b2dff",
-  appleMobileWebAppTitle: "My App"
-});
-
-// metaTags.links: Array of link tag objects
-// metaTags.meta: Array of meta tag objects
-// Use programmatically - no HTML injection risk
-```
-
 #### `mergeManifest(existingManifest: object, newManifestConfig: object): object`
 
 Merges a new manifest configuration into an existing manifest. Only updates app-specific fields (name, description, icons, theme colors, etc.), preserving all custom fields (shortcuts, share_target, categories, etc.).
@@ -439,9 +450,11 @@ Merges a new manifest configuration into an existing manifest. Only updates app-
 
 **Returns:** Merged manifest object.
 
+**Fields that are updated:** `name`, `short_name`, `description`, `start_url`, `display`, `theme_color`, `background_color`, `icons`. All other fields are preserved.
+
 **Example:**
 ```typescript
-import { mergeManifest, generateManifest } from '@polterware/pwa';
+import { mergeManifest } from '@polterware/pwa';
 
 const existing = {
   name: "Old Name",
@@ -449,22 +462,30 @@ const existing = {
   categories: ["games"]
 };
 
-const updated = mergeManifest(existing, generateManifest({
+const newConfig = {
   name: "New Name",
   short_name: "NewApp",
-  // ... other config
-}));
+  description: "New description"
+};
+
+const updated = mergeManifest(existing, newConfig);
 
 // Result preserves shortcuts and categories while updating name
 ```
 
-#### `pwaConfigToManifestConfig(config: PWAConfig): ManifestConfig`
+#### `getAppSpecificFields(): string[]`
 
-Converts PWAConfig (from pwa.config.json) to ManifestConfig format.
+Returns the list of fields that will be updated when using `mergeManifest()`. Useful for logging/debugging what will change.
 
-#### `pwaConfigToMetaTagsConfig(config: PWAConfig): MetaTagsConfig`
+**Returns:** Array of field names that are considered app-specific.
 
-Converts PWAConfig metaTags section to MetaTagsConfig format.
+**Example:**
+```typescript
+import { getAppSpecificFields } from '@polterware/pwa';
+
+const fields = getAppSpecificFields();
+console.log(fields); // ['name', 'short_name', 'description', ...]
+```
 
 ### React Hooks
 
@@ -569,138 +590,17 @@ interface InstallInstructions {
   gotItText: string;
 }
 
-interface ManifestConfig {
-  name: string;
-  short_name: string;
-  description: string;
-  start_url: string;
-  display?: "standalone" | "fullscreen" | "minimal-ui" | "browser";
-  background_color?: string;
-  theme_color?: string;
-  orientation?: "portrait" | "landscape" | "any";
-  icons: Array<{
-    src: string;
-    sizes: string;
-    type: string;
-    purpose?: "any" | "maskable" | "any maskable";
-  }>;
-  categories?: string[];
-  lang?: string;
-  dir?: "ltr" | "rtl";
-}
-
-interface MetaTagsConfig {
-  manifestPath?: string;
-  themeColor?: string;
-  appleMobileWebAppCapable?: boolean;
-  appleMobileWebAppStatusBarStyle?: "default" | "black" | "black-translucent";
-  appleMobileWebAppTitle?: string;
-  appleTouchIcons?: Array<{
-    href: string;
-    sizes?: string;
-  }>;
-}
 
 interface UsePWAReturn {
   isPWA: boolean;
   isInstalled: boolean;
   platform: Platform;
 }
-
-interface MetaTagsObject {
-  links: Array<{
-    rel: string;
-    href: string;
-    sizes?: string;
-  }>;
-  meta: Array<{
-    name?: string;
-    property?: string;
-    content: string;
-  }>;
-}
-
-interface PWAConfig {
-  name: string;
-  shortName: string;
-  description: string;
-  startUrl: string;
-  display?: "standalone" | "fullscreen" | "minimal-ui" | "browser";
-  themeColor?: string;
-  backgroundColor?: string;
-  icons: Array<{
-    src: string;
-    sizes: string;
-    type: string;
-    purpose?: "any" | "maskable" | "any maskable";
-  }>;
-  metaTags?: {
-    manifestPath?: string;
-    themeColor?: string;
-    appleMobileWebAppCapable?: boolean;
-    appleMobileWebAppStatusBarStyle?: "default" | "black" | "black-translucent";
-    appleMobileWebAppTitle?: string;
-    appleTouchIcons?: Array<{
-      href: string;
-      sizes?: string;
-    }>;
-  };
-}
 ```
 
 ## Examples
 
 ### Next.js Integration
-
-**app/layout.tsx:**
-```typescript
-import { getMetaTagsObject } from '@polterware/pwa';
-import type { Metadata } from 'next';
-
-// Use getMetaTagsObject for safe, programmatic access to meta tags
-const metaTags = getMetaTagsObject({
-  manifestPath: "/manifest.json",
-  themeColor: "#7b2dff",
-  appleMobileWebAppTitle: "My App",
-  appleTouchIcons: [
-    { href: "/icons/apple-touch-icon.png" }
-  ]
-});
-
-// Convert to Next.js Metadata format (example)
-export const metadata: Metadata = {
-  manifest: metaTags.links.find(l => l.rel === 'manifest')?.href,
-  themeColor: metaTags.meta.find(m => m.name === 'theme-color')?.content,
-  // ... other metadata
-};
-```
-
-**public/manifest.json:**
-```json
-{
-  "name": "My App",
-  "short_name": "MyApp",
-  "description": "My awesome app",
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#7b2dff",
-  "background_color": "#0f0f0f",
-  "icons": [
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
-```
 
 **app/components/InstallButton.tsx:**
 ```typescript

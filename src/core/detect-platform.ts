@@ -2,15 +2,19 @@ import type { Platform } from "./types";
 
 /**
  * Detects the current platform based on user agent.
- * 
+ *
  * @returns {Platform} The detected platform (ios, android, macos_safari, desktop, or other)
  */
 export function detectPlatform(): Platform {
-  if (typeof window === "undefined" || typeof navigator === "undefined") {
+  if (
+    typeof window === "undefined" ||
+    typeof navigator === "undefined" ||
+    !window.navigator
+  ) {
     return "other";
   }
 
-  const userAgent = window.navigator.userAgent.toLowerCase();
+  const userAgent = window.navigator.userAgent?.toLowerCase() ?? "";
 
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
   const isAndroid = /android/.test(userAgent);
