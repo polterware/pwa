@@ -8,13 +8,13 @@ A general-purpose PWA utilities package for detecting installation, platform det
 
 ## Features
 
-- 🔍 **Installation Detection**: Detect if your PWA is already installed
-- 📱 **Platform Detection**: Detect iOS, Android, macOS Safari, Desktop, and other platforms
-- 📋 **Install Instructions**: Get platform-specific install instructions
-- 🛠️ **Interactive CLI**: Interactive setup tool to create or update PWA manifest
-- ⚛️ **React Hooks**: React hooks for easy integration
-- 🎨 **UI Agnostic**: No UI dependencies - use with any UI library
-- 📦 **TypeScript**: Full TypeScript support with type definitions
+- **Installation Detection**: Detect if your PWA is already installed
+- **Platform Detection**: Detect iOS, Android, macOS Safari, Desktop, and other platforms
+- **Install Instructions**: Get platform-specific install instructions
+- **Interactive CLI**: Interactive setup tool to create or update PWA manifest
+- **React Hooks**: React hooks for easy integration
+- **UI Agnostic**: No UI dependencies - use with any UI library
+- **TypeScript**: Full TypeScript support with type definitions
 
 ## Installation
 
