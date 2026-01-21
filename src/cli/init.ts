@@ -9,6 +9,7 @@ import {
   writeJSONFile,
 } from "./utils";
 import { generateManifest } from "../utils/generate-manifest";
+import { mergeManifest } from "../utils/merge-manifest";
 import type { ManifestConfig } from "../core/types";
 
 /**
@@ -133,6 +134,9 @@ export async function init(manifestPath?: string): Promise<void> {
 
   // Read existing manifest if it exists
   const existing = readExistingManifest(manifestFilePath);
+  const existingManifestFull = fileExists(manifestFilePath)
+    ? readJSONFile<any>(manifestFilePath)
+    : null;
 
   console.log("\n📝 Let's set up your PWA manifest!\n");
 
@@ -247,7 +251,12 @@ export async function init(manifestPath?: string): Promise<void> {
     };
 
     // Generate manifest
-    const manifest = generateManifest(manifestConfig);
+    const newManifest = generateManifest(manifestConfig);
+
+    // Merge with existing manifest if it exists, preserving custom fields
+    const manifest = existingManifestFull
+      ? mergeManifest(existingManifestFull, newManifest)
+      : newManifest;
 
     // Write manifest (without comments, since it's already filled)
     writeJSONFile(manifestFilePath, manifest);
