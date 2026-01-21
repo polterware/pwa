@@ -348,4 +348,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 
-Polterware
+[Polterware](https://www.polterware.com)
