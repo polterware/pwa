@@ -15,7 +15,11 @@ import type { ManifestConfig } from "../core/types";
  * Extracts icon folder path from existing icons
  */
 function extractIconFolder(existing: any): string {
-  if (existing?.icons && Array.isArray(existing.icons) && existing.icons.length > 0) {
+  if (
+    existing?.icons &&
+    Array.isArray(existing.icons) &&
+    existing.icons.length > 0
+  ) {
     const firstIcon = existing.icons[0];
     if (firstIcon.src) {
       // Extract folder path (remove filename)
@@ -30,14 +34,16 @@ function extractIconFolder(existing: any): string {
 /**
  * Reads existing manifest and extracts values for placeholders
  */
-function readExistingManifest(manifestPath: string): Partial<ManifestConfig> & { _iconFolder?: string } | null {
+function readExistingManifest(
+  manifestPath: string,
+): (Partial<ManifestConfig> & { _iconFolder?: string }) | null {
   if (!fileExists(manifestPath)) {
     return null;
   }
 
   try {
     const existing = readJSONFile<any>(manifestPath);
-    
+
     // Extract icon folder path
     const iconFolder = extractIconFolder(existing);
 
@@ -60,22 +66,27 @@ function readExistingManifest(manifestPath: string): Partial<ManifestConfig> & {
 /**
  * Generates icon entries from folder path and sizes
  */
-function generateIconsFromFolder(folderPath: string, sizes: string[]): Array<{
+function generateIconsFromFolder(
+  folderPath: string,
+  sizes: string[],
+): Array<{
   src: string;
   sizes: string;
   type: string;
-  purpose: string;
+  purpose: "any" | "maskable" | "any maskable";
 }> {
   const defaultType = "image/png";
-  
+
   // Ensure folder path ends with /
-  const normalizedFolder = folderPath.endsWith("/") ? folderPath : `${folderPath}/`;
-  
+  const normalizedFolder = folderPath.endsWith("/")
+    ? folderPath
+    : `${folderPath}/`;
+
   return sizes.map((size) => ({
     src: `${normalizedFolder}icon-${size}.png`,
     sizes: size,
     type: defaultType,
-    purpose: "any maskable",
+    purpose: "any maskable" as const,
   }));
 }
 
@@ -86,13 +97,15 @@ export async function init(manifestPath?: string): Promise<void> {
   const projectRoot = findProjectRoot();
 
   if (!projectRoot) {
-    console.error("❌ Error: Could not find project root (looking for package.json)");
+    console.error(
+      "❌ Error: Could not find project root (looking for package.json)",
+    );
     process.exit(1);
   }
 
   // Determine manifest path
   let manifestFilePath: string;
-  
+
   if (manifestPath) {
     manifestFilePath = join(projectRoot, manifestPath);
   } else {
@@ -104,7 +117,7 @@ export async function init(manifestPath?: string): Promise<void> {
     } else {
       // Default to public/manifest.json (common location)
       manifestFilePath = join(projectRoot, "public", "manifest.json");
-      
+
       // Create public directory if it doesn't exist
       const publicDir = dirname(manifestFilePath);
       if (!existsSync(publicDir)) {
@@ -130,28 +143,32 @@ export async function init(manifestPath?: string): Promise<void> {
       name: "name",
       message: "App name (full name):",
       initial: existing?.name || "My App",
-      validate: (value: string) => value.trim().length > 0 || "App name is required",
+      validate: (value: string) =>
+        value.trim().length > 0 || "App name is required",
     },
     {
       type: "text",
       name: "short_name",
       message: "App short name (max 12 characters recommended):",
       initial: existing?.short_name || "",
-      validate: (value: string) => value.trim().length > 0 || "Short name is required",
+      validate: (value: string) =>
+        value.trim().length > 0 || "Short name is required",
     },
     {
       type: "text",
       name: "description",
       message: "App description:",
       initial: existing?.description || "My awesome progressive web app",
-      validate: (value: string) => value.trim().length > 0 || "Description is required",
+      validate: (value: string) =>
+        value.trim().length > 0 || "Description is required",
     },
     {
       type: "text",
       name: "start_url",
       message: "Start URL (usually '/' for root):",
       initial: existing?.start_url || "/",
-      validate: (value: string) => value.trim().length > 0 || "Start URL is required",
+      validate: (value: string) =>
+        value.trim().length > 0 || "Start URL is required",
     },
     {
       type: "text",
@@ -160,7 +177,10 @@ export async function init(manifestPath?: string): Promise<void> {
       initial: existing?.theme_color || "#000000",
       validate: (value: string) => {
         const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-        return hexRegex.test(value) || "Please enter a valid hex color (e.g., #000000)";
+        return (
+          hexRegex.test(value) ||
+          "Please enter a valid hex color (e.g., #000000)"
+        );
       },
     },
     {
@@ -170,7 +190,10 @@ export async function init(manifestPath?: string): Promise<void> {
       initial: existing?.background_color || "#ffffff",
       validate: (value: string) => {
         const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-        return hexRegex.test(value) || "Please enter a valid hex color (e.g., #ffffff)";
+        return (
+          hexRegex.test(value) ||
+          "Please enter a valid hex color (e.g., #ffffff)"
+        );
       },
     },
     {
@@ -178,7 +201,8 @@ export async function init(manifestPath?: string): Promise<void> {
       name: "icon_folder",
       message: "Icon folder path (e.g., /icons):",
       initial: existing?._iconFolder || "/icons",
-      validate: (value: string) => value.trim().length > 0 || "Icon folder path is required",
+      validate: (value: string) =>
+        value.trim().length > 0 || "Icon folder path is required",
     },
     {
       type: "multiselect",
@@ -205,7 +229,10 @@ export async function init(manifestPath?: string): Promise<void> {
 
   try {
     // Generate icons from folder and selected sizes
-    const icons = generateIconsFromFolder(responses.icon_folder.trim(), responses.icon_sizes);
+    const icons = generateIconsFromFolder(
+      responses.icon_folder.trim(),
+      responses.icon_sizes,
+    );
 
     // Build manifest config
     const manifestConfig: ManifestConfig = {

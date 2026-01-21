@@ -1,6 +1,6 @@
 "use client";
 
-import { usePwaInstalled } from "./use-is-pwa";
+import { useIsInstalled } from "./use-is-installed";
 import { usePlatform } from "./use-platform";
 import { getInstallInstructions } from "../constants/install-instructions";
 import type { InstallInstructions } from "../core/types";
@@ -70,7 +70,7 @@ export function InstallPrompt({
   instructionsConfig,
   hideIfInstalled = true,
 }: InstallPromptProps) {
-  const isInstalled = usePwaInstalled();
+  const isInstalled = useIsInstalled();
   const platform = usePlatform();
   const instructions = getInstallInstructions(platform, instructionsConfig);
 

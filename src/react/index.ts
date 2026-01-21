@@ -1,6 +1,5 @@
-export { usePwaInstalled } from "./use-is-pwa";
 export { usePlatform } from "./use-platform";
-export { useIsPWA } from "./use-is-pwa";
+export { useIsInstalled } from "./use-is-installed";
 export { usePWA } from "./use-pwa";
 export type { UsePWAReturn } from "./use-pwa";
 export { InstallPrompt } from "./install-prompt";
