@@ -85,9 +85,9 @@ export function InstallPrompt({
 
   // Determine the config to use: locale shorthand takes precedence
   // If neither locale nor instructionsConfig is provided, use empty object to get default English
-  const config: DefaultInstallInstructionsConfig | LocaleConfig = 
-    locale 
-      ? { locale, overrides: instructionsConfig } 
+  const config: DefaultInstallInstructionsConfig | LocaleConfig =
+    locale
+      ? { locale, overrides: instructionsConfig }
       : instructionsConfig ?? {};
   const instructions = getInstallInstructions(platform, config);
 
@@ -95,13 +95,23 @@ export function InstallPrompt({
     return null;
   }
 
-  // If renderInstructions is provided, it means the parent wants to control the UI
-  // In this case, we just provide the instructions data
+  // If both renderTrigger and renderInstructions are provided, render both
+  // This allows the trigger (button) and instructions (modal/dialog) to work together
+  if (renderTrigger && renderInstructions) {
+    return (
+      <>
+        {renderTrigger(instructions)}
+        {renderInstructions(instructions)}
+      </>
+    );
+  }
+
+  // If only renderInstructions is provided, render it alone
   if (renderInstructions) {
     return <>{renderInstructions(instructions)}</>;
   }
 
-  // If renderTrigger is provided, render it
+  // If only renderTrigger is provided, render it alone
   if (renderTrigger) {
     return <>{renderTrigger(instructions)}</>;
   }
