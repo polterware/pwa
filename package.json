@@ -1,6 +1,6 @@
 {
   "name": "@polterware/pwa",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A general-purpose PWA utilities package for detecting installation, platform detection, and generating PWA configurations",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
