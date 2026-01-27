@@ -8,6 +8,10 @@
   "bin": {
     "@polterware/pwa": "./dist/cli/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polterware/pwa.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
