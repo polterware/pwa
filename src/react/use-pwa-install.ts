@@ -21,6 +21,10 @@ import type {
 } from "../core/types";
 
 type PromptPhase = "idle" | "prompting" | "accepted" | "dismissed";
+type MediaQueryListWithLegacyListeners = MediaQueryList & {
+  addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+  removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+};
 
 function markEnvironmentInstalled(
   environment: InstallEnvironment,
@@ -175,16 +179,16 @@ export function usePWAInstall({
         return [];
       }
 
-      return [window.matchMedia(query)];
+      return [window.matchMedia(query) as MediaQueryListWithLegacyListeners];
     });
 
     mediaQueryLists.forEach((mediaQueryList) => {
-      if ("addEventListener" in mediaQueryList) {
+      if (typeof mediaQueryList.addEventListener === "function") {
         mediaQueryList.addEventListener("change", syncEnvironment);
         return;
       }
 
-      mediaQueryList.addListener(syncEnvironment);
+      mediaQueryList.addListener?.(syncEnvironment);
     });
 
     return () => {
@@ -195,12 +199,12 @@ export function usePWAInstall({
       window.removeEventListener("appinstalled", handleAppInstalled);
 
       mediaQueryLists.forEach((mediaQueryList) => {
-        if ("removeEventListener" in mediaQueryList) {
+        if (typeof mediaQueryList.removeEventListener === "function") {
           mediaQueryList.removeEventListener("change", syncEnvironment);
           return;
         }
 
-        mediaQueryList.removeListener(syncEnvironment);
+        mediaQueryList.removeListener?.(syncEnvironment);
       });
     };
   }, []);

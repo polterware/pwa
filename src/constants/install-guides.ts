@@ -88,10 +88,16 @@ function mergeGuideConfig<T extends Record<string, string>>(
   return nextConfig;
 }
 
+function isLocaleConfig(
+  config: InstallGuideConfig | LocaleConfig,
+): config is LocaleConfig {
+  return "locale" in config;
+}
+
 function resolveConfig(
   config: InstallGuideConfig | LocaleConfig,
 ): InstallGuideLocale {
-  if ("locale" in config && config.locale) {
+  if (isLocaleConfig(config)) {
     const localeConfig = LOCALES[config.locale] ?? LOCALES.en;
     const overrides = config.overrides ?? {};
 
@@ -109,7 +115,7 @@ function resolveConfig(
     };
   }
 
-  const overrides = config ?? {};
+  const overrides: InstallGuideConfig = config;
 
   return {
     actionLabel: overrides.actionLabel ?? DEFAULT_GUIDES.actionLabel,
