@@ -1,4 +1,4 @@
-![Header](https://odtcysoyznttkcpvbyju.supabase.co/storage/v1/object/public/polterware-bucket/pwa.png)
+![Header](https://rjgupsedtqayyhdyqgfk.supabase.co/storage/v1/object/public/polterware-bucket/pwa.png)
 
 # @polterware/pwa
 
