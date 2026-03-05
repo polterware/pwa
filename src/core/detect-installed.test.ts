@@ -1,7 +1,3 @@
-/**
- * Tests for detectInstalled function
- */
-
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { detectInstalled } from "./detect-installed";
 
@@ -33,6 +29,36 @@ describe("detectInstalled", () => {
     (global as any).window = {
       matchMedia: vi.fn((query: string) => ({
         matches: query === "(display-mode: standalone)",
+      })),
+      navigator: {},
+    };
+    expect(detectInstalled()).toBe(true);
+  });
+
+  it("should return true when display-mode is fullscreen", () => {
+    (global as any).window = {
+      matchMedia: vi.fn((query: string) => ({
+        matches: query === "(display-mode: fullscreen)",
+      })),
+      navigator: {},
+    };
+    expect(detectInstalled()).toBe(true);
+  });
+
+  it("should return true when display-mode is minimal-ui", () => {
+    (global as any).window = {
+      matchMedia: vi.fn((query: string) => ({
+        matches: query === "(display-mode: minimal-ui)",
+      })),
+      navigator: {},
+    };
+    expect(detectInstalled()).toBe(true);
+  });
+
+  it("should return true when display-mode is window-controls-overlay", () => {
+    (global as any).window = {
+      matchMedia: vi.fn((query: string) => ({
+        matches: query === "(display-mode: window-controls-overlay)",
       })),
       navigator: {},
     };

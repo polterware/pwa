@@ -1,10 +1,6 @@
-/**
- * Tests for generateManifest function
- */
-
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateManifest } from "./generate-manifest";
-import type { ManifestConfig } from "../core/types";
+import type { ManifestConfig } from "./types";
 
 describe("generateManifest", () => {
   const baseConfig: ManifestConfig = {
@@ -21,8 +17,9 @@ describe("generateManifest", () => {
     ],
   };
 
-  it("should generate basic manifest", () => {
+  it("generates the required manifest fields", () => {
     const manifest = generateManifest(baseConfig);
+
     expect(manifest).toMatchObject({
       name: "Test App",
       short_name: "Test",
@@ -32,29 +29,29 @@ describe("generateManifest", () => {
     });
   });
 
-  it("should include optional fields when provided", () => {
-    const config: ManifestConfig = {
+  it("includes optional fields when provided", () => {
+    const manifest = generateManifest({
       ...baseConfig,
       background_color: "#000000",
       theme_color: "#ffffff",
       orientation: "portrait",
-      categories: ["games"],
+      categories: ["productivity"],
       lang: "en",
       dir: "ltr",
-    };
-    const manifest = generateManifest(config);
+    });
+
     expect(manifest).toMatchObject({
       background_color: "#000000",
       theme_color: "#ffffff",
       orientation: "portrait",
-      categories: ["games"],
+      categories: ["productivity"],
       lang: "en",
       dir: "ltr",
     });
   });
 
-  it("should include icon purpose when provided", () => {
-    const config: ManifestConfig = {
+  it("preserves icon purpose when provided", () => {
+    const manifest = generateManifest({
       ...baseConfig,
       icons: [
         {
@@ -64,10 +61,12 @@ describe("generateManifest", () => {
           purpose: "any maskable",
         },
       ],
-    };
-    const manifest = generateManifest(config);
-    expect((manifest as any).icons[0]).toMatchObject({
-      purpose: "any maskable",
     });
+
+    expect((manifest as { icons: Array<{ purpose?: string }> }).icons[0]).toEqual(
+      expect.objectContaining({
+        purpose: "any maskable",
+      }),
+    );
   });
 });

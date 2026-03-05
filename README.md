@@ -6,17 +6,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-A general-purpose PWA utilities package for detecting installation, platform detection, and PWA install instructions. Works with any framework or vanilla JavaScript.
+Headless PWA install utilities and manifest tools for modern web apps.
 
-## Features
+## Overview
 
-- **Installation Detection**: Detect if your PWA is already installed
-- **Platform Detection**: Detect iOS, Android, macOS Safari, Desktop, and other platforms
-- **Install Instructions**: Get platform-specific install instructions
-- **Interactive CLI**: Interactive setup tool to create or update PWA manifest
-- **React Hooks**: React hooks for easy integration
-- **UI Agnostic**: No UI dependencies - use with any UI library
-- **TypeScript**: Full TypeScript support with type definitions
+`@polterware/pwa` v2 is centered around install environment detection instead of UI components.
+
+- Detect the current install environment with browser-aware rules
+- Use native install prompts when the browser exposes `beforeinstallprompt`
+- Show manual guides only for verified flows such as iOS Safari and Safari on macOS
+- Keep manifest generation in a dedicated module
+- Use React hooks without forcing a button, modal, or layout
 
 ## Installation
 
@@ -24,330 +24,231 @@ A general-purpose PWA utilities package for detecting installation, platform det
 npm install @polterware/pwa
 ```
 
-For React support (peer dependency):
+For React integration:
 
 ```bash
 npm install react react-dom
 ```
 
----
+## Package Entry Points
 
-## Quick Reference
-
-### Imports Cheatsheet
-
-```typescript
-// Core functions (vanilla JS/TS)
+```ts
 import {
-  detectInstalled, // Check if PWA is installed
-  detectPlatform, // Get current platform
-  getInstallInstructions, // Get platform-specific instructions
+  detectInstallEnvironment,
+  getInstallGuide,
 } from "@polterware/pwa";
 
-// React hooks & components
-import {
-  usePWA, // Combined hook (recommended) - returns { isInstalled, platform }
-  useIsInstalled, // Simple boolean hook - returns isInstalled status
-  usePlatform, // Returns detected platform
-  InstallPrompt, // UI-agnostic install prompt component
-} from "@polterware/pwa/react";
+import { usePWAInstall } from "@polterware/pwa/react";
 
-// Types
-import type {
-  Platform, // 'ios' | 'android' | 'macos_safari' | 'desktop' | 'other'
-  Locale, // 'en' | 'pt-BR' | 'es'
-  InstallInstructions, // Install instructions object
-  InstallInstruction, // Single instruction step
-} from "@polterware/pwa";
+import {
+  generateManifest,
+  mergeManifest,
+} from "@polterware/pwa/manifest";
 ```
 
-### Which Hook to Use?
+## Browser Matrix
 
-| Hook               | Returns                     | Use Case                                                |
-| ------------------ | --------------------------- | ------------------------------------------------------- |
-| `usePWA()`         | `{ isInstalled, platform }` | **Recommended** - need both install status AND platform |
-| `useIsInstalled()` | `boolean`                   | Simple check if app is installed as PWA                 |
-| `usePlatform()`    | `Platform`                  | Only need platform detection                            |
-
----
+| Browser / OS | Install strategy | Notes |
+| --- | --- | --- |
+| Safari on iOS | Manual guide | Uses `ios_share_sheet` |
+| Safari on macOS | Manual guide | Uses `safari_add_to_dock` |
+| Chrome desktop | Native prompt | Available only after `beforeinstallprompt` |
+| Edge desktop | Native prompt | Available only after `beforeinstallprompt` |
+| Samsung Internet | Native prompt | Available only after `beforeinstallprompt` |
+| Arc desktop | Unsupported | No manual fallback is generated |
+| Firefox / unknown browsers | Unsupported | No guessed instructions |
 
 ## Quick Start
 
-### Vanilla JavaScript / TypeScript
+### Vanilla TypeScript
 
-```typescript
+```ts
 import {
-  detectInstalled,
-  detectPlatform,
-  getInstallInstructions,
+  detectInstallEnvironment,
+  getInstallGuide,
 } from "@polterware/pwa";
 
-const isInstalled = detectInstalled();
-const platform = detectPlatform(); // 'ios' | 'android' | 'macos_safari' | 'desktop' | 'other'
-const instructions = getInstallInstructions(platform);
+const environment = detectInstallEnvironment();
+const guide = getInstallGuide(environment.guideId, { locale: "en" });
 
-console.log(instructions.title); // Platform-specific title
-console.log(instructions.steps); // Array of installation steps
+if (environment.availability === "manual" && guide) {
+  console.log(guide.title);
+  console.log(guide.steps);
+}
 ```
 
 ### React
 
 ```tsx
-import { usePWA, InstallPrompt } from "@polterware/pwa/react";
+import { usePWAInstall } from "@polterware/pwa/react";
 
-function MyApp() {
-  const { isInstalled, platform } = usePWA();
+export function InstallCallout() {
+  const { canPrompt, promptInstall, status, guide } = usePWAInstall({
+    locale: "en",
+  });
 
-  if (isInstalled) {
-    return <div>App is installed on {platform}!</div>;
+  if (status === "installed" || status === "unsupported") {
+    return null;
+  }
+
+  if (canPrompt) {
+    return (
+      <button onClick={() => void promptInstall()}>
+        Install app
+      </button>
+    );
+  }
+
+  if (!guide) {
+    return null;
   }
 
   return (
-    <InstallPrompt
-      locale="pt-BR"
-      renderTrigger={(instructions) => (
-        <button>{instructions.buttonText}</button>
-      )}
-      renderInstructions={(instructions) => (
-        <div>
-          <h2>{instructions.title}</h2>
-          <p>{instructions.subtitle}</p>
-          {instructions.steps.map((step) => (
-            <div key={step.number}>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    />
+    <section>
+      <h2>{guide.title}</h2>
+      <p>{guide.description}</p>
+      <ol>
+        {guide.steps.map((step) => (
+          <li key={step.number}>
+            <strong>{step.title}</strong>
+            <p>{step.description}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 ```
 
----
+## Runtime API
 
-## CLI Usage
+### `detectInstallEnvironment(): InstallEnvironment`
 
-Create or update your PWA manifest interactively:
+Returns a browser-aware snapshot of the current runtime.
+
+```ts
+const environment = detectInstallEnvironment();
+
+// {
+//   os: "windows",
+//   browser: "chrome",
+//   isInstalled: false,
+//   availability: "unavailable",
+//   reason: "criteria_unmet",
+//   guideId: null
+// }
+```
+
+### `getInstallGuide(guideId, config?): InstallGuide | null`
+
+Returns manual install content only for supported guide ids.
+
+```ts
+const guide = getInstallGuide("ios_share_sheet", {
+  locale: "en",
+});
+```
+
+### `usePWAInstall(options?): UsePWAInstallReturn`
+
+React hook that combines environment detection, deferred prompt lifecycle, and guide lookup.
+
+```ts
+const {
+  environment,
+  canPrompt,
+  promptInstall,
+  status,
+  guide,
+} = usePWAInstall();
+```
+
+The hook:
+
+- captures `beforeinstallprompt`
+- exposes `canPrompt`
+- runs `promptInstall()` only when a deferred prompt exists
+- reacts to `appinstalled`
+- keeps manual guides and native prompts mutually exclusive
+
+## Manifest Module
+
+The manifest helpers now live in `@polterware/pwa/manifest`.
+
+```ts
+import {
+  generateManifest,
+  mergeManifest,
+} from "@polterware/pwa/manifest";
+
+const manifest = generateManifest({
+  name: "Polterware",
+  short_name: "Polter",
+  description: "Headless PWA install flow",
+  start_url: "/",
+  icons: [
+    {
+      src: "/icons/icon-192x192.png",
+      sizes: "192x192",
+      type: "image/png",
+      purpose: "any maskable",
+    },
+  ],
+});
+```
+
+## CLI
+
+Create or update `manifest.json` interactively:
 
 ```bash
 npx @polterware/pwa init
 ```
 
-The CLI will:
-
-1. Look for existing `manifest.json` and use values as placeholders
-2. Ask for app name, colors, icons, etc.
-3. Create/update the manifest file
-
-Options:
+Custom manifest path:
 
 ```bash
-npx @polterware/pwa init --manifest-path custom/path/manifest.json
+npx @polterware/pwa init --manifest-path public/manifest.json
 ```
 
----
+## Public Types
 
-## API Reference
+```ts
+type OperatingSystem =
+  | "ios"
+  | "android"
+  | "macos"
+  | "windows"
+  | "linux"
+  | "other";
 
-### Core Functions
+type Browser =
+  | "safari"
+  | "chrome"
+  | "arc"
+  | "edge"
+  | "firefox"
+  | "samsungInternet"
+  | "other";
 
-#### `detectInstalled(): boolean`
+type InstallAvailability =
+  | "native"
+  | "manual"
+  | "unsupported"
+  | "unavailable";
 
-Detects if the PWA is installed by checking `display-mode: standalone` and `navigator.standalone` (iOS).
-
-```typescript
-const isInstalled = detectInstalled();
+type InstallGuideId = "ios_share_sheet" | "safari_add_to_dock";
 ```
 
-#### `detectPlatform(): Platform`
+## Breaking Changes in v2
 
-Detects the current platform.
+These APIs are no longer part of the main public surface:
 
-```typescript
-const platform = detectPlatform();
-// Returns: 'ios' | 'android' | 'macos_safari' | 'desktop' | 'other'
-```
+- `detectPlatform`
+- `getInstallInstructions`
+- `usePWA`
+- `usePlatform`
+- `useIsInstalled`
+- `InstallPrompt`
 
-#### `getInstallInstructions(platform, config?): InstallInstructions`
-
-Returns platform-specific install instructions. Supports built-in locales or custom config.
-
-```typescript
-// Using built-in locale (en, pt-BR, es)
-const instructions = getInstallInstructions("ios", { locale: "pt-BR" });
-
-// Using custom config
-const instructions = getInstallInstructions("ios", {
-  title: "Install My App",
-  subtitle: "Add to your home screen",
-  buttonText: "Install",
-  gotItText: "Got it!",
-});
-
-// Using locale with overrides
-const instructions = getInstallInstructions("ios", {
-  locale: "pt-BR",
-  overrides: { title: "Meu App" },
-});
-```
-
-**Available Locales:**
-
-| Locale  | Language            |
-| ------- | ------------------- |
-| `en`    | English (default)   |
-| `pt-BR` | Portuguese (Brazil) |
-| `es`    | Spanish             |
-
-### React Hooks
-
-#### `usePWA(): UsePWAReturn`
-
-**Recommended** - Combined hook for PWA status and platform.
-
-```typescript
-const { isInstalled, platform } = usePWA();
-```
-
-#### `useIsInstalled(): boolean`
-
-Simple hook for PWA installation status.
-
-```typescript
-const isInstalled = useIsInstalled();
-```
-
-#### `usePlatform(): Platform`
-
-Hook for platform detection.
-
-```typescript
-const platform = usePlatform();
-```
-
-### React Components
-
-#### `InstallPrompt`
-
-UI-agnostic component with render props for complete customization.
-
-| Prop                 | Type                          | Default | Description                              |
-| -------------------- | ----------------------------- | ------- | ---------------------------------------- |
-| `renderTrigger`      | `(instructions) => ReactNode` | -       | Render function for trigger button       |
-| `renderInstructions` | `(instructions) => ReactNode` | -       | Render function for instructions         |
-| `children`           | `ReactNode`                   | -       | Fallback if `renderTrigger` not provided |
-| `instructionsConfig` | `object`                      | -       | Override default instruction texts       |
-| `locale`             | `'en' \| 'pt-BR' \| 'es'`     | -       | Use built-in translations for locale     |
-| `hideIfInstalled`    | `boolean`                     | `true`  | Hide component if PWA is installed       |
-
----
-
-## Types
-
-```typescript
-type Platform = "ios" | "macos_safari" | "android" | "desktop" | "other";
-
-interface InstallInstruction {
-  number: number;
-  title: string;
-  description: string;
-}
-
-interface InstallInstructions {
-  platform: Platform;
-  steps: InstallInstruction[];
-  title: string;
-  subtitle: string;
-  buttonText: string;
-  gotItText: string;
-}
-
-interface UsePWAReturn {
-  isInstalled: boolean;
-  platform: Platform;
-}
-```
-
----
-
-## Examples
-
-### Next.js Integration
-
-```tsx
-// app/components/InstallButton.tsx
-"use client";
-
-import { usePWA, InstallPrompt } from "@polterware/pwa/react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-
-export function InstallButton() {
-  const { isInstalled, platform } = usePWA();
-  const [open, setOpen] = useState(false);
-
-  if (isInstalled) return null;
-
-  return (
-    <InstallPrompt
-      instructionsConfig={{
-        title: "Install My App",
-        subtitle: "Add to your home screen for quick access",
-      }}
-      renderTrigger={(instructions) => (
-        <Button onClick={() => setOpen(true)}>{instructions.buttonText}</Button>
-      )}
-      renderInstructions={(instructions) => (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{instructions.title}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {instructions.steps.map((step) => (
-                <div key={step.number} className="flex gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
-                    {step.number}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button onClick={() => setOpen(false)}>
-              {instructions.gotItText}
-            </Button>
-          </DialogContent>
-        </Dialog>
-      )}
-    />
-  );
-}
-```
-
----
-
-## Requirements
-
-- **Node.js**: >= 16.0.0
-- **React** (for hooks): >= 16.8.0
-
-## License
-
-MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-<a href="https://www.polterware.com" target="_blank" rel="noopener noreferrer">Polterware</a>
+The library now expects the application to own the button, modal, and install UI.

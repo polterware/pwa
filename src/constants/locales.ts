@@ -1,122 +1,103 @@
-import type { DefaultInstallInstructionsConfig } from "./install-instructions";
+import type { InstallGuideLocale } from "./install-guides";
 
 /**
- * Supported locales for install instructions.
+ * Supported locales for install guides.
  */
 export type Locale = "en" | "pt-BR" | "es";
 
 /**
  * English (default) locale preset.
  */
-const en: Required<DefaultInstallInstructionsConfig> = {
-  title: "Install App",
-  subtitle: "Add to your home screen for quick access",
-  subtitleMacos: "Add to Dock for quick access",
-  buttonText: "Install App",
-  gotItText: "Got it!",
-  ios: {
-    step1Title: "Tap the Share icon",
-    step1Desc:
-      "In Safari's bar, tap the share icon (square with arrow pointing up)",
-    step2Title: "Scroll down the menu",
-    step2Desc: "In the sheet that opens, drag down to see more options",
-    step3Title: "Tap 'Add to Home Screen'",
-    step3Desc: "Then tap 'Add' in the top right corner",
+const en: InstallGuideLocale = {
+  actionLabel: "Install app",
+  closeLabel: "Got it",
+  iosShareSheet: {
+    title: "Install on iPhone or iPad",
+    description: "Use Safari's share sheet to add this app to your Home Screen.",
+    step1Title: "Open the Share menu",
+    step1Description:
+      "Tap the Share icon in Safari's toolbar to open the system share sheet.",
+    step2Title: "Find the install action",
+    step2Description:
+      "Scroll the share sheet until you see the Add to Home Screen action.",
+    step3Title: "Confirm the install",
+    step3Description:
+      "Tap Add to Home Screen, then tap Add to place the app on your Home Screen.",
   },
-  android: {
-    step1Title: "Open browser menu",
-    step1Desc: "Tap the three dots in the top right corner",
-    step2Title: "Install app",
-    step2Desc: 'Tap "Install app" or "Add to Home Screen"',
-  },
-  macos: {
-    step1Title: "Click the File menu",
-    step1Desc: "In Safari's menu bar, click 'File'",
-    step2Title: "Add to Dock",
-    step2Desc: "Click 'Add to Dock' to create a shortcut",
-  },
-  desktop: {
-    step1Title: "Click the browser menu",
-    step1Desc: "Click the three dots in the top right corner",
-    step2Title: "Install app",
-    step2Desc: "Click 'Install App' or 'Install app'",
+  safariAddToDock: {
+    title: "Install in Safari on macOS",
+    description: "Use Safari's Add to Dock action to install this web app.",
+    step1Title: "Open the File menu",
+    step1Description: "In Safari, open the File menu from the macOS menu bar.",
+    step2Title: "Choose Add to Dock",
+    step2Description:
+      "Click Add to Dock to create an app-style shortcut in your Dock.",
   },
 };
 
 /**
  * Portuguese (Brazil) locale preset.
  */
-const ptBR: Required<DefaultInstallInstructionsConfig> = {
-  title: "Instalar App",
-  subtitle: "Adicione à tela inicial para acesso rápido",
-  subtitleMacos: "Adicione ao Dock para acesso rápido",
-  buttonText: "Instalar App",
-  gotItText: "Entendi!",
-  ios: {
-    step1Title: "Toque no ícone Compartilhar",
-    step1Desc:
-      "Na barra do Safari, toque no ícone de compartilhar (quadrado com seta para cima)",
-    step2Title: "Role o menu para baixo",
-    step2Desc: "Na janela que abrir, arraste para baixo para ver mais opções",
-    step3Title: "Toque em 'Adicionar à Tela de Início'",
-    step3Desc: "Em seguida, toque em 'Adicionar' no canto superior direito",
+const ptBR: InstallGuideLocale = {
+  actionLabel: "Instalar app",
+  closeLabel: "Entendi",
+  iosShareSheet: {
+    title: "Instale no iPhone ou iPad",
+    description:
+      "Use a folha de compartilhamento do Safari para adicionar este app à Tela de Início.",
+    step1Title: "Abra o menu Compartilhar",
+    step1Description:
+      "Toque no ícone Compartilhar na barra do Safari para abrir a folha do sistema.",
+    step2Title: "Encontre a ação de instalação",
+    step2Description:
+      "Role a folha de compartilhamento até ver a ação Adicionar à Tela de Início.",
+    step3Title: "Confirme a instalação",
+    step3Description:
+      "Toque em Adicionar à Tela de Início e depois em Adicionar para colocar o app na sua Tela de Início.",
   },
-  android: {
-    step1Title: "Abra o menu do navegador",
-    step1Desc: "Toque nos três pontos no canto superior direito",
-    step2Title: "Instalar app",
-    step2Desc: 'Toque em "Instalar app" ou "Adicionar à tela inicial"',
-  },
-  macos: {
-    step1Title: "Clique no menu Arquivo",
-    step1Desc: "Na barra de menus do Safari, clique em 'Arquivo'",
-    step2Title: "Adicionar ao Dock",
-    step2Desc: "Clique em 'Adicionar ao Dock' para criar um atalho",
-  },
-  desktop: {
-    step1Title: "Clique no menu do navegador",
-    step1Desc: "Clique nos três pontos no canto superior direito",
-    step2Title: "Instalar app",
-    step2Desc: "Clique em 'Instalar App' ou 'Instalar aplicativo'",
+  safariAddToDock: {
+    title: "Instale no Safari para macOS",
+    description:
+      "Use a ação Adicionar ao Dock do Safari para instalar este web app.",
+    step1Title: "Abra o menu Arquivo",
+    step1Description:
+      "No Safari, abra o menu Arquivo na barra de menus do macOS.",
+    step2Title: "Escolha Adicionar ao Dock",
+    step2Description:
+      "Clique em Adicionar ao Dock para criar um atalho com comportamento de app no Dock.",
   },
 };
 
 /**
  * Spanish locale preset.
  */
-const es: Required<DefaultInstallInstructionsConfig> = {
-  title: "Instalar App",
-  subtitle: "Añade a tu pantalla de inicio para acceso rápido",
-  subtitleMacos: "Añade al Dock para acceso rápido",
-  buttonText: "Instalar App",
-  gotItText: "¡Entendido!",
-  ios: {
-    step1Title: "Toca el ícono de Compartir",
-    step1Desc:
-      "En la barra de Safari, toca el ícono de compartir (cuadrado con flecha hacia arriba)",
-    step2Title: "Desplázate en el menú",
-    step2Desc:
-      "En la ventana que se abre, arrastra hacia abajo para ver más opciones",
-    step3Title: "Toca 'Añadir a pantalla de inicio'",
-    step3Desc: "Luego toca 'Añadir' en la esquina superior derecha",
+const es: InstallGuideLocale = {
+  actionLabel: "Instalar app",
+  closeLabel: "Entendido",
+  iosShareSheet: {
+    title: "Instala en iPhone o iPad",
+    description:
+      "Usa la hoja de compartir de Safari para añadir esta app a tu pantalla de inicio.",
+    step1Title: "Abre el menú Compartir",
+    step1Description:
+      "Toca el ícono Compartir en la barra de Safari para abrir la hoja del sistema.",
+    step2Title: "Encuentra la acción de instalación",
+    step2Description:
+      "Desplázate por la hoja de compartir hasta ver la acción Añadir a pantalla de inicio.",
+    step3Title: "Confirma la instalación",
+    step3Description:
+      "Toca Añadir a pantalla de inicio y luego Añadir para colocar la app en tu pantalla de inicio.",
   },
-  android: {
-    step1Title: "Abre el menú del navegador",
-    step1Desc: "Toca los tres puntos en la esquina superior derecha",
-    step2Title: "Instalar app",
-    step2Desc: 'Toca "Instalar app" o "Añadir a pantalla de inicio"',
-  },
-  macos: {
-    step1Title: "Haz clic en el menú Archivo",
-    step1Desc: "En la barra de menús de Safari, haz clic en 'Archivo'",
-    step2Title: "Añadir al Dock",
-    step2Desc: "Haz clic en 'Añadir al Dock' para crear un acceso directo",
-  },
-  desktop: {
-    step1Title: "Haz clic en el menú del navegador",
-    step1Desc: "Haz clic en los tres puntos en la esquina superior derecha",
-    step2Title: "Instalar app",
-    step2Desc: "Haz clic en 'Instalar App' o 'Instalar aplicación'",
+  safariAddToDock: {
+    title: "Instala en Safari para macOS",
+    description:
+      "Usa la acción Añadir al Dock de Safari para instalar esta web app.",
+    step1Title: "Abre el menú Archivo",
+    step1Description:
+      "En Safari, abre el menú Archivo desde la barra de menús de macOS.",
+    step2Title: "Elige Añadir al Dock",
+    step2Description:
+      "Haz clic en Añadir al Dock para crear un acceso directo con comportamiento de app en tu Dock.",
   },
 };
 
@@ -125,7 +106,7 @@ const es: Required<DefaultInstallInstructionsConfig> = {
  */
 export const LOCALES: Record<
   Locale,
-  Required<DefaultInstallInstructionsConfig>
+  InstallGuideLocale
 > = {
   en,
   "pt-BR": ptBR,
@@ -138,6 +119,6 @@ export const LOCALES: Record<
  */
 export function getLocalePreset(
   locale: Locale,
-): Required<DefaultInstallInstructionsConfig> {
+): InstallGuideLocale {
   return LOCALES[locale] ?? LOCALES.en;
 }

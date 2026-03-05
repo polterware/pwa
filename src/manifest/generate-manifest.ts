@@ -1,13 +1,7 @@
-import type { ManifestConfig } from "../core/types";
+import type { ManifestConfig } from "./types";
 
-/**
- * Generates a Web App Manifest JSON object based on the provided configuration.
- * 
- * @param {ManifestConfig} config - The manifest configuration
- * @returns {object} The manifest JSON object
- */
 export function generateManifest(config: ManifestConfig): object {
-  const manifest: any = {
+  const manifest: Record<string, unknown> = {
     name: config.name,
     short_name: config.short_name,
     description: config.description,

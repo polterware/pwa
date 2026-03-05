@@ -8,9 +8,9 @@ import {
   readJSONFile,
   writeJSONFile,
 } from "./utils";
-import { generateManifest } from "../utils/generate-manifest";
-import { mergeManifest } from "../utils/merge-manifest";
-import type { ManifestConfig } from "../core/types";
+import { generateManifest } from "../manifest/generate-manifest";
+import { mergeManifest } from "../manifest/merge-manifest";
+import type { ManifestConfig } from "../manifest/types";
 
 /**
  * Extracts icon folder path from existing icons

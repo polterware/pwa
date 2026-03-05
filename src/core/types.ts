@@ -1,37 +1,74 @@
-export type Platform = "ios" | "macos_safari" | "android" | "desktop" | "other";
+export type OperatingSystem =
+  | "ios"
+  | "android"
+  | "macos"
+  | "windows"
+  | "linux"
+  | "other";
 
-export interface InstallInstruction {
+export type Browser =
+  | "safari"
+  | "chrome"
+  | "arc"
+  | "edge"
+  | "firefox"
+  | "samsungInternet"
+  | "other";
+
+export type InstallAvailability =
+  | "native"
+  | "manual"
+  | "unsupported"
+  | "unavailable";
+
+export type InstallReason =
+  | "already_installed"
+  | "browser_unsupported"
+  | "criteria_unmet"
+  | "unknown";
+
+export type InstallGuideId = "ios_share_sheet" | "safari_add_to_dock";
+
+export interface InstallEnvironment {
+  os: OperatingSystem;
+  browser: Browser;
+  isInstalled: boolean;
+  availability: InstallAvailability;
+  reason: InstallReason;
+  guideId: InstallGuideId | null;
+}
+
+export interface InstallGuideStep {
   number: number;
   title: string;
   description: string;
 }
 
-export interface InstallInstructions {
-  platform: Platform;
-  steps: InstallInstruction[];
+export interface InstallGuide {
+  id: InstallGuideId;
   title: string;
-  subtitle: string;
-  buttonText: string;
-  gotItText: string;
+  description: string;
+  actionLabel: string;
+  closeLabel: string;
+  steps: InstallGuideStep[];
 }
 
-// ManifestConfig is only used internally by the CLI
-export interface ManifestConfig {
-  name: string;
-  short_name: string;
-  description: string;
-  start_url: string;
-  display?: "standalone" | "fullscreen" | "minimal-ui" | "browser";
-  background_color?: string;
-  theme_color?: string;
-  orientation?: "portrait" | "landscape" | "any";
-  icons: Array<{
-    src: string;
-    sizes: string;
-    type: string;
-    purpose?: "any" | "maskable" | "any maskable";
-  }>;
-  categories?: string[];
-  lang?: string;
-  dir?: "ltr" | "rtl";
+export interface InstallPromptChoice {
+  outcome: "accepted" | "dismissed";
+  platform: string;
 }
+
+export interface DeferredBeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<InstallPromptChoice>;
+}
+
+export type PWAInstallStatus =
+  | "installed"
+  | "manual"
+  | "prompt_available"
+  | "prompting"
+  | "accepted"
+  | "dismissed"
+  | "unsupported"
+  | "unavailable";

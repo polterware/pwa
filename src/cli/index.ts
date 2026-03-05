@@ -6,7 +6,7 @@ const program = new Command();
 program
   .name("@polterware/pwa")
   .description("CLI tool for managing PWA configuration")
-  .version("1.0.0");
+  .version("1.1.5");
 
 program
   .command("init")

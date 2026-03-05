@@ -1,20 +1,27 @@
-/**
- * Detects if the PWA is already installed on the device.
- * Works by checking display-mode: standalone media query and navigator.standalone (iOS Safari).
- * 
- * @returns {boolean} True if the PWA is installed, false otherwise
- */
+const DISPLAY_MODE_QUERIES = [
+  "(display-mode: standalone)",
+  "(display-mode: fullscreen)",
+  "(display-mode: minimal-ui)",
+  "(display-mode: window-controls-overlay)",
+] as const;
+
+function matchesDisplayMode(query: (typeof DISPLAY_MODE_QUERIES)[number]): boolean {
+  return (
+    typeof window.matchMedia === "function" && window.matchMedia(query).matches
+  );
+}
+
 export function detectInstalled(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
-  // Check for display-mode: standalone (standard PWA detection)
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-
-  // Check for iOS Safari standalone mode
+  const isDisplayModeInstalled = DISPLAY_MODE_QUERIES.some(matchesDisplayMode);
   const isIOSStandalone =
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+    true;
 
-  return isStandalone || isIOSStandalone;
+  return isDisplayModeInstalled || isIOSStandalone;
 }
+
+export { DISPLAY_MODE_QUERIES };

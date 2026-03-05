@@ -1,16 +1,22 @@
-// Core functions (framework-agnostic)
-export { detectInstalled } from "./core/detect-installed";
-export { detectPlatform } from "./core/detect-platform";
-export { getInstallInstructions } from "./constants/install-instructions";
-
-// Types
+export { detectInstallEnvironment } from "./core/detect-install-environment";
+export { getInstallGuide } from "./constants/install-guides";
 export type {
-  Platform,
-  InstallInstruction,
-  InstallInstructions,
+  Browser,
+  DeferredBeforeInstallPromptEvent,
+  InstallAvailability,
+  InstallEnvironment,
+  InstallGuide,
+  InstallGuideId,
+  InstallGuideStep,
+  InstallPromptChoice,
+  InstallReason,
+  OperatingSystem,
+  PWAInstallStatus,
 } from "./core/types";
 export type {
-  DefaultInstallInstructionsConfig,
+  IOSShareSheetGuideConfig,
+  InstallGuideConfig,
   LocaleConfig,
-} from "./constants/install-instructions";
+  SafariAddToDockGuideConfig,
+} from "./constants/install-guides";
 export type { Locale } from "./constants/locales";

@@ -1,7 +1,7 @@
 {
   "name": "@polterware/pwa",
-  "version": "1.1.5",
-  "description": "A general-purpose PWA utilities package for detecting installation, platform detection, and generating PWA configurations",
+  "version": "1.1.6",
+  "description": "Headless PWA install utilities and manifest tools for modern web apps",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -22,6 +22,11 @@
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
+    },
+    "./manifest": {
+      "types": "./dist/manifest/index.d.ts",
+      "import": "./dist/manifest/index.mjs",
+      "require": "./dist/manifest/index.js"
     }
   },
   "files": [
@@ -34,6 +39,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "release": "bash scripts/release.sh",
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
@@ -45,6 +51,7 @@
     "install",
     "detection",
     "platform",
+    "install-prompt",
     "manifest",
     "meta-tags",
     "react",
